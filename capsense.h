@@ -1,16 +1,30 @@
+/*
+ *
+ *    Copyright (c) 2020 Project CHIP Authors
+ *    Copyright (c) 2019 Google LLC.
+ *    All rights reserved.
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
 #include "cy_pdl.h"
 #include "cybsp.h"
 #include "cycfg.h"
 #include "cycfg_capsense.h"
 #include "cyhal.h"
 #include "events/mbed_events.h"
-#include "mbed_power_mgmt.h"
 #include "platform/Callback.h"
 #include "rtos/rtos.h"
-
-#define sleep unistd_sleep
-#include <platform/CHIPDeviceLayer.h>
-#undef sleep
 
 class Capsense
 {
@@ -48,8 +62,8 @@ public:
 private:
     Capsense() {}
     ~Capsense() {}
-    Capsense(const Capsense&) = delete;
-    Capsense& operator=(const Capsense&) = delete;
+    Capsense(const Capsense &) = delete;
+    Capsense & operator=(const Capsense &) = delete;
 
     void initialize_capsense_tuner();
     static void RunCapSenseScan();
@@ -85,6 +99,8 @@ public:
     }
 
     ~CapsenseButton(){};
+    CapsenseButton(const CapsenseButton &) = delete;
+    CapsenseButton & operator=(const CapsenseButton &) = delete;
     //  int getStatus();
     void rise(Callback<void()> func);
     void fall(Callback<void()> func);
@@ -121,6 +137,8 @@ public:
     CapsenseSlider(Capsense & manager) : _manager(manager), _slider_pos(0) { _manager.register_event_handler(this); }
 
     ~CapsenseSlider(){};
+    CapsenseSlider(const CapsenseSlider &) = delete;
+    CapsenseSlider & operator=(const CapsenseSlider &) = delete;
     int getStatus() { return _slider_pos; };
     void on_move(Callback<void(int)> func);
 

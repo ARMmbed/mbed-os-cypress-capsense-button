@@ -1,5 +1,24 @@
+/*
+ *
+ *    Copyright (c) 2020 Project CHIP Authors
+ *    Copyright (c) 2019 Google LLC.
+ *    All rights reserved.
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
 
 #include "capsense.h"
+#include "mbed_power_mgmt.h"
 #include "mbed_trace.h"
 using namespace std::literals::chrono_literals;
 
@@ -17,26 +36,26 @@ const cy_stc_sysint_t CapSense_ISR_cfg = { .intrSrc = CYBSP_CSD_IRQ, .intrPriori
 Semaphore capsense_sem;
 EventQueue queue;
 
-cy_stc_scb_ezi2c_context_t EZI2C_context;
-uint32_t prevBtn0Status                       = 0u;
-uint32_t prevBtn1Status                       = 0u;
-uint32_t prevSliderPos                        = 0u;
-volatile uint32_t irr                         = 0;
-volatile uint32_t fails                       = 0;
-cy_stc_syspm_callback_params_t callbackParams = { .base = CYBSP_CSD_HW, .context = &cy_capsense_context };
+static cy_stc_scb_ezi2c_context_t EZI2C_context;
+static uint32_t prevBtn0Status                       = 0u;
+static uint32_t prevBtn1Status                       = 0u;
+static uint32_t prevSliderPos                        = 0u;
+static volatile uint32_t irr                         = 0;
+static volatile uint32_t fails                       = 0;
+static cy_stc_syspm_callback_params_t callbackParams = { .base = CYBSP_CSD_HW, .context = &cy_capsense_context };
 
-cy_stc_syspm_callback_t capsenseDeepSleepCb = { Cy_CapSense_DeepSleepCallback,
-                                                CY_SYSPM_DEEPSLEEP,
-                                                (CY_SYSPM_SKIP_CHECK_FAIL | CY_SYSPM_SKIP_BEFORE_TRANSITION |
-                                                 CY_SYSPM_SKIP_AFTER_TRANSITION),
-                                                &callbackParams,
-                                                NULL,
-                                                NULL };
+static cy_stc_syspm_callback_t capsenseDeepSleepCb = { Cy_CapSense_DeepSleepCallback,
+                                                       CY_SYSPM_DEEPSLEEP,
+                                                       (CY_SYSPM_SKIP_CHECK_FAIL | CY_SYSPM_SKIP_BEFORE_TRANSITION |
+                                                        CY_SYSPM_SKIP_AFTER_TRANSITION),
+                                                       &callbackParams,
+                                                       NULL,
+                                                       NULL };
 
-cy_stc_scb_ezi2c_context_t ezi2c_context;
-cyhal_ezi2c_t sEzI2C;
-cyhal_ezi2c_slave_cfg_t sEzI2C_sub_cfg;
-cyhal_ezi2c_cfg_t sEzI2C_cfg;
+static cy_stc_scb_ezi2c_context_t ezi2c_context;
+static cyhal_ezi2c_t sEzI2C;
+static cyhal_ezi2c_slave_cfg_t sEzI2C_sub_cfg;
+static cyhal_ezi2c_cfg_t sEzI2C_cfg;
 
 void handle_error(void)
 {
@@ -48,22 +67,17 @@ void handle_error(void)
 
 void Capsense::RunCapSenseScan()
 {
-
     Cy_CapSense_Wakeup(&cy_capsense_context);
 
     if (CY_CAPSENSE_NOT_BUSY == Cy_CapSense_IsBusy(&cy_capsense_context))
     {
-
         Cy_CapSense_ScanAllWidgets(&cy_capsense_context);
     }
-
     capsense_sem.acquire();
     Cy_CapSense_ProcessAllWidgets(&cy_capsense_context);
-
 #if TUNER_ENABLE
     Cy_CapSense_RunTuner(&cy_capsense_context);
 #endif
-
     ProcessTouchStatus();
 }
 
@@ -91,7 +105,6 @@ void Capsense::initialize_capsense_tuner()
 
 void Capsense::ProcessTouchStatus()
 {
-
     uint32_t currSliderPos;
     uint32_t currBtn0Status =
         Cy_CapSense_IsSensorActive(CY_CAPSENSE_BUTTON0_WDGT_ID, CY_CAPSENSE_BUTTON0_SNS0_ID, &cy_capsense_context);
@@ -141,7 +154,6 @@ void Capsense::ProcessTouchStatus()
 
 void Capsense::CapSense_InterruptHandler(void)
 {
-
     Cy_CapSense_InterruptHandler(CYBSP_CSD_HW, &cy_capsense_context);
 }
 
@@ -153,7 +165,6 @@ void Capsense::CapSenseEndOfScanCallback(cy_stc_active_scan_sns_t * ptrActiveSca
 void Capsense::init()
 {
     cybsp_init();
-
     initialize_capsense_tuner();
     sleep_manager_lock_deep_sleep();
 

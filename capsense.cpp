@@ -20,8 +20,10 @@
 #include "capsense.h"
 #include "mbed_power_mgmt.h"
 #include "mbed_trace.h"
+
 using namespace std::literals::chrono_literals;
 
+#define TRACE_GROUP "CAP"
 #define SLIDER_NUM_TOUCH (1u)
 #define LED_OFF (1u)
 #define LED_ON (0u)

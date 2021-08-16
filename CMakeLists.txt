@@ -4,11 +4,11 @@
 add_library(capsense INTERFACE)
 
 if(${MBED_TOOLCHAIN} STREQUAL "GCC_ARM")
-    set(CY_CAPSESNE_LIB COMPONENT_SOFTFP/TOOLCHAIN_GCC_ARM/libcy_capsense.a)
+    set(CY_CAPSENSE_LIB COMPONENT_SOFTFP/TOOLCHAIN_GCC_ARM/libcy_capsense.a)
 elseif(${MBED_TOOLCHAIN} STREQUAL "ARM")
-    set(CY_CAPSESNE_LIB COMPONENT_SOFTFP/TOOLCHAIN_ARM/libcy_capsense.ar)
+    set(CY_CAPSENSE_LIB COMPONENT_SOFTFP/TOOLCHAIN_ARM/libcy_capsense.ar)
 elseif(${MBED_TOOLCHAIN} STREQUAL "IAR")
-    set(CY_CAPSESNE_LIB COMPONENT_SOFTFP/TOOLCHAIN_IAR/libcy_capsense.a)
+    set(CY_CAPSENSE_LIB COMPONENT_SOFTFP/TOOLCHAIN_IAR/libcy_capsense.a)
 endif()
 
 target_include_directories(capsense
@@ -44,5 +44,5 @@ target_link_libraries(capsense
         mbed-core 
         mbed-events 
         mbed-rtos
-        ${CMAKE_CURRENT_SOURCE_DIR}/${CY_CAPSESNE_LIB}
+        ${CMAKE_CURRENT_SOURCE_DIR}/${CY_CAPSENSE_LIB}
 )
